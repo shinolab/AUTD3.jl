@@ -9,7 +9,7 @@
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
 # 
 
-const dll_name = "./dll/autd3capi.dll"
+dll_name = joinpath(pwd(), "dll", "autd3cpi.dll")
 
 # Controller
 autd_create_controller(handle_ptr) = ccall((:AUTDCreateController, dll_name), Cvoid, (Ref{Ptr{Cvoid}},), handle_ptr)
