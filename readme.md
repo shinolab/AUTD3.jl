@@ -1,21 +1,58 @@
-# Readme #
+# AUTD3.jl #
 
-## Usage ##
+AUTD3 library wrapper for Julia 1.3 
 
-基本的には通常のAUTDと同様です.
+version: 0.3.0
 
-利用時はJuliaのパッケージマネージャ上でパッケージをactivateして下さい.
+## Install ##
+
 ```
-(v1.3) pkg> activate .
+(v1.3) pkg> add https://github.com/shinolab/AUTD3.jl.git
 ```
 
-詳細は同梱のsimple.jlを参照して下さい.
+## Exmaple
 
-## Limitation ##
+```julia
+using AUTD3
 
-一部メソッドは(面倒なので)実装されてません.
+function get_adapter()
+    adapters = enumerate_adapters();
+    for (i, adapter) in enumerate(adapters)
+        println("[" * string(i) * "]: " * adapter[2] * ", " * adapter[1])
+    end
 
-追加したい人は, 追加してMerge/Pullリク送って下さい.
+    print("Input number: ")
+    idx = parse(Int64, readline())
+
+    adapters[idx][2]
+end
+
+function main()
+    autd = AUTD()
+
+    add_device(autd, (0., 0., 0.), (0., 0., 0.))
+
+    adapter = get_adapter()
+
+    open_autd(autd, SOEM, adapter)
+
+    g = focal_point_gain((90., 80., 150.))
+    m = sine_modulation(150)
+
+    append_gain_sync(autd, g)
+    append_modulation_sync(autd, m)
+
+    println("press any key to exit...")
+    readline();
+
+    dispose(g)
+    dispose(m)
+    dispose(autd)
+end
+
+main();
+println("finish")
+```
 
 # Author #
 
