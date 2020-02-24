@@ -1,6 +1,6 @@
 # AUTD3.jl #
 
-AUTD3 library wrapper for Julia 1.3 
+[autd3 library](https://github.com/shinolab/autd3-library-software) wrapper for Julia 1.3 
 
 version: 0.3.0
 
