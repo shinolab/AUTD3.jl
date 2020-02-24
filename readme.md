@@ -7,7 +7,7 @@ version: 0.3.0
 ## Install ##
 
 ```
-(v1.3) pkg> add https://github.com/shinolab/AUTD3.jl.git
+(v1.3) pkg> add https://github.com/shinolab/AUTD3.jl.git#v0.3
 ```
 
 ## Exmaple
