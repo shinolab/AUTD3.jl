@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 23/02/2020
+# Last Modified: 27/02/2020
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -68,19 +68,25 @@ function open_autd(autd::AUTD, linktype::LinkType, location = "")
 end
 
 function dispose(self::AUTD)
-    autd_close(self._handle)
-    autd_free(self._handle)
-    self._disposed = true
+    if !self._disposed
+        autd_close(self._handle)
+        autd_free(self._handle)
+        self._disposed = true
+    end
 end
 
 function dispose(self::Gain)
-    autd_delete_gain(self._gain_ptr)
-    self._disposed = true
+    if !self._disposed
+        autd_delete_gain(self._gain_ptr)
+        self._disposed = true
+    end
 end
 
 function dispose(self::Modulation)
-    autd_delete_modulation(self._mod_ptr)
-    self._disposed = true
+    if !self._disposed
+        autd_delete_modulation(self._mod_ptr)
+        self._disposed = true
+    end
 end
 
 function enumerate_adapters()
