@@ -50,6 +50,11 @@ function main()
 
     open_autd(autd, SOEM, adapter)
 
+    firm_info_list = firmware_info_list(autd)
+    for (i, firm_info) in enumerate(firm_info_list)
+        println("[" * string(i) * "]: CPU: " * firm_info[1] * ", FPGA: " * firm_info[2])
+    end
+
     g = focal_point_gain((90., 80., 150.))
     m = sine_modulation(150)
 
