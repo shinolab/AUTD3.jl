@@ -1,6 +1,4 @@
-![Windows](https://github.com/shinolab/AUTD3.jl/workflows/Windows/badge.svg)
-![Linux](https://github.com/shinolab/AUTD3.jl/workflows/Linux/badge.svg)
-![MacOS](https://github.com/shinolab/AUTD3.jl/workflows/MacOS/badge.svg)
+![build](https://github.com/shinolab/AUTD3.jl/workflows/build/badge.svg)
 
 # AUTD3.jl #
 

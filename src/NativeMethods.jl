@@ -45,7 +45,7 @@ autd_calibrate_modulation(handle_ptr) = ccall((:AUTDCalibrateModulation, _dll_na
 
 autd_set_silent_mode(handle_ptr, silent) = ccall((:AUTDSetSilentMode, _dll_name), Cvoid, (Ptr{Cvoid}, Bool), handle_ptr, silent)
 
-autd_stop(handle_ptr) = ccall((:AUTDStop, _dll_name), Cvoid, (Ptr{Cvoid}), handle_ptr)
+autd_stop(handle_ptr) = ccall((:AUTDStop, _dll_name), Cvoid, (Ptr{Cvoid},), handle_ptr)
 
 autd_get_adapter_pointer(handle_ptr) = ccall((:AUTDGetAdapterPointer, _dll_name), Int32, (Ref{Ptr{Cvoid}},), handle_ptr)
 autd_get_adapter(handle, index, decs_p, name_p) = ccall((:AUTDGetAdapter, _dll_name), Cvoid, (Ptr{Cvoid}, Int32, Ref{UInt8}, Ref{UInt8}), handle, index, decs_p, name_p)

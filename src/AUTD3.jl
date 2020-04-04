@@ -12,8 +12,9 @@
 module AUTD3
 
 export Gain, Modulation, AUTD
-export open_autd, dispose, add_device, calibrate_modulation
-export enumerate_adapters
+export open_autd, dispose, add_device, calibrate_modulation, autd_stop
+export enumerate_adapters, firmware_info_list
+export set_silent_mode
 export focal_point_gain
 export sine_modulation, modulation
 export append_gain_sync, append_modulation_sync
@@ -135,6 +136,10 @@ end
 
 function calibrate_modulation(autd::AUTD)
     autd_calibrate_modulation(autd._handle)
+end
+
+function autd_stop(autd::AUTD)
+    autd_stop(autd._handle)
 end
 
 function focal_point_gain(position::Tuple{Float64,Float64,Float64}; amp = UInt8(255))
