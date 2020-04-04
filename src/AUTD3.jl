@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 27/02/2020
+# Last Modified: 04/04/2020
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -106,10 +106,31 @@ function enumerate_adapters()
     res
 end
 
+function firmware_info_list(autd::AUTD)
+    res = []
+    phandle = Ref(Ptr{Cvoid}(0))
+    size = autd_get_firm_info_list_pointer(autd._handle, phandle)
+    handle::Ptr{Cvoid} = phandle[]
+
+    for i in 0:size - 1
+        sb_cpu = zeros(UInt8, 128)
+        sb_fpga = zeros(UInt8, 128)
+        autd_get_firm_info(handle, i, sb_cpu,  sb_fpga)
+        push!(res, [String(strip(String(sb_cpu), '\0')), String(strip(String(sb_fpga), '\0'))])
+    end
+
+    autd_free_firm_info_list_pointer(handle)
+    res
+end
+
 function add_device(autd::AUTD, pos::Tuple{Float64,Float64,Float64} = (0.f0, 0.f0, 0.f0), rot::Tuple{Float64,Float64,Float64} = (0.f0, 0.f0, 0.f0))
     x, y, z = pos
     az1, ay, az2 = rot
     autd_add_device(autd._handle, x, y, z, az1, ay, az2, 1)
+end
+
+function set_silent_mode(autd::AUTD, silent::Bool)
+    autd_set_silent_mode(autd._handle, silent)
 end
 
 function calibrate_modulation(autd::AUTD)
@@ -139,8 +160,8 @@ function append_gain(autd::AUTD, gain::Gain)
     autd_append_gain(autd._handle, gain._gain_ptr);
 end
 
-function append_gain_sync(autd::AUTD, gain::Gain)
-    autd_append_gain_sync(autd._handle, gain._gain_ptr);
+function append_gain_sync(autd::AUTD, gain::Gain, wait_for_send::Bool = false)
+    autd_append_gain_sync(autd._handle, gain._gain_ptr, wait_for_send);
 end
 
 function append_modulation(autd::AUTD, mod::Modulation)

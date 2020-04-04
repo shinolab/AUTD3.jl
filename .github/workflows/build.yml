@@ -1,0 +1,21 @@
+name: build
+
+on: [push]
+
+jobs:
+  test:
+    name: build test on ${{ matrix.os }} with ${{ matrix.julia-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        julia-version: ['1.3.0']
+
+    steps:
+      - uses: actions/checkout@v1.0.0
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.julia-version }}
+      - name: Build Package
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url=\"https://github.com/shinolab/AUTD3.jl\", rev=\"dev\")); Pkg.build(\"AUTD3\")'
