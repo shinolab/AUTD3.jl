@@ -18,4 +18,8 @@ jobs:
         with:
           version: ${{ matrix.julia-version }}
       - name: Build Package
+        if: matrix.os == 'windows-latest'
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url=\"https://github.com/shinolab/AUTD3.jl\", rev=\"dev\")); Pkg.build(\"AUTD3\")'
+      - name: Build Package
+        if: matrix.os != 'windows-latest'
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/shinolab/AUTD3.jl", rev="dev")); Pkg.build("AUTD3")'
