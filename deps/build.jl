@@ -62,7 +62,7 @@ function replace_latest_binary(version::String)
     module_path = joinpath(@__DIR__, "..", "src")
     ext = get_archive_file_ext()
     os_info = get_os_info()
-    url = joinpath(base_url, "v" * version, "autd3-" * "v" * version * "-" * os_info * ext)
+    url = base_url * "/v" * version * "/autd3-" * "v" * version * "-" * os_info * ext
     tmp_archive_path = joinpath(module_path, "tmp" * ext)
     file = download(url, tmp_archive_path)
     if startswith(os_info, "win")
