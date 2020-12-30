@@ -43,7 +43,7 @@ end
 
 function extract_zip(zipfile)
     lib_ext = get_lib_ext()
-    run(`tar -xvf $zipfile bin/"*"$lib_ext`)
+    run(`unzip $zipfile bin/"*"$lib_ext`)
     cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force=true)
     rm("bin"; force=true, recursive=true)
     rm(zipfile; force=true)
