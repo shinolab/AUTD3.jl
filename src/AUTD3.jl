@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 29/12/2020
+# Last Modified: 30/12/2020
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -60,6 +60,19 @@ end
     LM = 5
 end
 
+mutable struct SDPParam
+    _regularization::Float32
+    _repeat::Int32
+    _lambda::Float32
+    _normalize::Bool
+    function SDPParam(r::Float32, repeat::Int32, l::Float32, n::Bool)
+        new(r, repeat, l, n)
+    end    
+    function SDPParam()
+        new(-1f0, Int32(-1), -1f0, true)
+    end
+end
+
 mutable struct Configuration
     _mod_sampl_freq::ModSamplingFreq
     _mod_buf_size::ModBufSize
@@ -67,7 +80,7 @@ mutable struct Configuration
         new(mod_sampl_freq, mod_buf_size)
     end    
     function Configuration()
-        new(ModSamplingFreq::SMPL_4_KHZ, ModBufSize::BUF_4000)
+        new(SMPL_4_KHZ, BUF_4000)
     end
 end
 
@@ -104,7 +117,7 @@ end
 mutable struct Link
     _link_ptr::Ptr{Cvoid}
     function Link(link_ptr::Ptr{Cvoid})
-        new(link_ptr, false)
+        new(link_ptr)
     end
 end
 
@@ -121,7 +134,7 @@ mutable struct AUTD
 end
 
 function open_autd(autd::AUTD, link::Link)
-    autd_open(autd._handle, link._link_ptr)
+    autd_open_controller_with(autd._handle, link._link_ptr)
 end
 
 function dispose(self::AUTD)
@@ -173,27 +186,27 @@ end
 function firmware_info_list(autd::AUTD)
     res = []
     phandle = Ref(Ptr{Cvoid}(0))
-    size = autd_get_firm_info_list_pointer(autd._handle, phandle)
+    size = autd_get_firmware_info_list_pointer(autd._handle, phandle)
     handle::Ptr{Cvoid} = phandle[]
 
     for i in 0:size - 1
         sb_cpu = zeros(UInt8, 128)
         sb_fpga = zeros(UInt8, 128)
-        autd_get_firm_info(handle, i, sb_cpu,  sb_fpga)
+        autd_get_firmware_info(handle, i, sb_cpu,  sb_fpga)
         push!(res, [String(strip(String(sb_cpu), '\0')), String(strip(String(sb_fpga), '\0'))])
     end
 
-    autd_free_firm_info_list_pointer(handle)
+    autd_free_firmware_info_list_pointer(handle)
     res
 end
 
-function add_device(autd::AUTD, pos::SVector{3,Float32}, rot::SVector{3,Float32}, group_id=0)
+function add_device(autd::AUTD, pos::SVector{3,Float32}, rot::SVector{3,Float32}; group_id=0)
     x, y, z = pos
     az1, ay, az2 = rot
     autd_add_device(autd._handle, x, y, z, az1, ay, az2, group_id)
 end
 
-function add_device(autd::AUTD, pos::SVector{3,Float32}, qua::SVector{4,Float32}, group_id=0)
+function add_device(autd::AUTD, pos::SVector{3,Float32}, qua::SVector{4,Float32}; group_id=0)
     x, y, z = pos
     qw, qx, qy, qz = qua
     autd_add_device_quaternion(autd._handle, x, y, z, qw, qx, qy, qz, group_id)
@@ -253,15 +266,15 @@ function adjust_amp(amp::Float32)
     UInt8(510.0 * d)
 end
 
-function focal_point_gain(position::SVector{3,Float32}; amp::UInt8=UInt8(255))
+function focal_point_gain_with_duty(position::SVector{3,Float32}; duty::UInt8)
     x, y, z = position
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_focal_point_gain(chandle, x, y, z, amp)
+    autd_focal_point_gain(chandle, x, y, z, duty)
     Gain(chandle[])
 end
 
 function focal_point_gain(position::SVector{3,Float32}; amp::Float32=1.0f0)
-    focal_point_gain(position; amp=adjust_amp(amp))
+    focal_point_gain_with_duty(position; duty=adjust_amp(amp))
 end
 
 function grouped_gain(group_ids::Array{Int32,1}, gains::Array{Gain,1})
@@ -272,27 +285,27 @@ function grouped_gain(group_ids::Array{Int32,1}, gains::Array{Gain,1})
     Gain(chandle[])
 end
 
-function bessel_beam_gain(position::SVector{3,Float32}, direction::SVector{3,Float32}, theta_z::Float32; amp::UInt8=UInt8(255))
+function bessel_beam_gain_with_duty(position::SVector{3,Float32}, direction::SVector{3,Float32}, theta_z::Float32; duty::UInt8)
     x, y, z = position
     nx, ny, nz = direction
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_bessel_beam_gain(chandle, x, y, z, nx, ny, nz, theta_z, amp)
+    autd_bessel_beam_gain(chandle, x, y, z, nx, ny, nz, theta_z, duty)
     Gain(chandle[])
 end
 
 function bessel_beam_gain(position::SVector{3,Float32}, direction::SVector{3,Float32}, theta_z::Float32; amp::Float32=1.0f0)
-    bessel_beam_gain(position, direction, theta_z; amp=adjust_amp(amp))
+    bessel_beam_gain_with_duty(position, direction, theta_z; duty=adjust_amp(amp))
 end
 
-function plane_wave_gain(direction::SVector{3,Float32}; amp::UInt8=UInt8(255))
+function plane_wave_gain_with_duty(direction::SVector{3,Float32}; duty::UInt8)
     nx, ny, nz = direction
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_plane_wave_gain(chandle, nx, ny, nz, amp)
+    autd_plane_wave_gain(chandle, nx, ny, nz, duty)
     Gain(chandle[])
 end
 
 function plane_wave_gain(direction::SVector{3,Float32}; amp::Float32=1.0f0)
-    plane_wave_gain(direction; amp=adjust_amp(amp))
+    plane_wave_gain_with_duty(direction; duty=adjust_amp(amp))
 end
 
 function custom_gain(data::Array{UInt16,1})
@@ -302,10 +315,19 @@ function custom_gain(data::Array{UInt16,1})
     Gain(chandle[])
 end
 
-function holo_gain(foci::Array{SVector{3,Float32},1}, amps::Array{Float32,1}; method::OptMethod=OptMethod.SDP, params=nothing)
+function holo_gain(foci::Array{SVector{3,Float32},1}, amps::Array{Float32,1}; method::OptMethod=SDP, params=nothing)
     len = length(foci)
+
+    foci_array = zeros(Float32, len*3)
+    for (i, focus) in enumerate(foci)
+        foci_array[3 * (i - 1) + 1] = focus[1]
+        foci_array[3 * (i - 1) + 2] = focus[2]
+        foci_array[3 * (i - 1) + 3] = focus[3]
+    end
+
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain(chandle, foci, amps, len, Int32(method), params)
+    ptr = params == nothing ? Ptr{Cvoid}(0) : Base.unsafe_convert(Ptr{Cvoid}, Ref(params))
+    autd_holo_gain(chandle, foci_array, amps, len, Int32(method), ptr)
     Gain(chandle[])
 end
 
@@ -372,14 +394,22 @@ function sequence()
     Sequence(chandle[])
 end
 
-function add_point(seq::Sequence, point::SVector{Float32,3})
+function add_point(seq::Sequence, point::SVector{3,Float32})
     x, y, z = point
     autd_sequence_append_point(seq._seq_ptr, x, y, z)
 end
 
-function add_points(seq::Sequence, points::Array{SVector{Float32,3},1})
+function add_points(seq::Sequence, points::Array{SVector{3,Float32},1})
     len = length(points)
-    autd_sequence_append_points(seq._seq_ptr, points, len)
+
+    points_array = zeros(Float32, len*3)
+    for (i, point) in enumerate(points)
+        points_array[3 * (i - 1) + 1] = point[1]
+        points_array[3 * (i - 1) + 2] = point[2]
+        points_array[3 * (i - 1) + 3] = point[3]
+    end
+
+    autd_sequence_append_points(seq._seq_ptr, points_array, len)
 end
 
 function set_freq(seq::Sequence, freq::Float32)
@@ -398,7 +428,7 @@ function get_sampling_freq_div(seq::Sequence)
     autd_sequence_sampling_freq_div(seq._seq_ptr)
 end
 
-function circum_sequence(center::SVector{Float32,3}, normal::SVector{Float32,3}, radius::Float32, n::UInt64)
+function circum_sequence(center::SVector{3,Float32}, normal::SVector{3,Float32}, radius::Float32, n::UInt64)
     x, y, z = center
     nx, ny, nz = normal
     chandle = Ref(Ptr{Cvoid}(0))
