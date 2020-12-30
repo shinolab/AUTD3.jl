@@ -44,17 +44,17 @@ end
 function extract_zip(zipfile)
     lib_ext = get_lib_ext()
     run(`tar -xvf $zipfile bin/"*"$lib_ext`)
-    cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force = true)
-    rm("bin"; force = true, recursive = true)
-    rm(zipfile; force = true)
+    cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force=true)
+    rm("bin"; force=true, recursive=true)
+    rm(zipfile; force=true)
 end
 
 function extract_targz(tarfile)
     lib_ext = get_lib_ext()
     run(`tar --wildcards -xvf $tarfile bin/"*"$lib_ext`)
-    cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force = true)
-    rm("bin"; force = true, recursive = true)
-    rm(tarfile; force = true)
+    cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force=true)
+    rm("bin"; force=true, recursive=true)
+    rm(tarfile; force=true)
 end
 
 function replace_latest_binary(version::String)
