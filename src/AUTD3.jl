@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 30/12/2020
+# Last Modified: 09/03/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -15,13 +15,13 @@ using StaticArrays
 
 export ModSamplingFreq, ModBufSize, OptMethod
 export Gain, Modulation, Sequence, Link, AUTD
-export open_autd, dispose, add_device, calibrate, clear, set_silent_mode, stop, is_open, is_silent_mode, wavelength, set_wavelength, set_delay
+export open_autd, dispose, add_device, calibrate, clear, set_silent_mode, stop, is_open, is_silent_mode, wavelength, set_wavelength
 export num_devices, num_transducers, remaining_in_buffer
 export enumerate_adapters, firmware_info_list
 export focal_point_gain, grouped_gain, bessel_beam_gain, plane_wave_gain, custom_gain, holo_gain, transducer_test_gain, null_gain
 export sine_modulation, modulation, custom_modulation, raw_pcm_modulation, saw_modulation, square_modulation, wav_modulation
 export sequence, add_point, add_points, set_freq, get_freq, get_sampling_freq, get_sampling_freq_div, circum_sequence
-export soem_link, twincat_link, local_twincat_link, emulator_link
+export soem_link, twincat_link, local_twincat_link
 export append_gain, append_gain_sync, append_modulation,append_modulation_sync, append_sequence
 export append_stm_gain, start_stm, stop_stm, finish_stm
 export flush
@@ -244,11 +244,6 @@ function set_wavelength(autd::AUTD, wavelength::Float32)
     autd_set_wavelength(autd._handle, wavelength)
 end
 
-function set_delay(autd::AUTD, delays::Array{UInt16,1})
-    size = length(delays)
-    autd_set_delay(autd._handle, delays, size)
-end
-
 function num_devices(autd::AUTD)
     autd_num_devices(autd._handle)
 end
@@ -318,7 +313,7 @@ end
 function holo_gain(foci::Array{SVector{3,Float32},1}, amps::Array{Float32,1}; method::OptMethod=SDP, params=nothing)
     len = length(foci)
 
-    foci_array = zeros(Float32, len*3)
+    foci_array = zeros(Float32, len * 3)
     for (i, focus) in enumerate(foci)
         foci_array[3 * (i - 1) + 1] = focus[1]
         foci_array[3 * (i - 1) + 2] = focus[2]
@@ -349,7 +344,7 @@ function modulation(amp::UInt8=0xFF)
     Modulation(chandle[])
 end
 
-function custom_modulation(data::Array{UInt8,1})
+    function custom_modulation(data::Array{UInt8,1})
     len = length(data)
     chandle = Ref(Ptr{Cvoid}(0))
     autd_custom_modulation(chandle, data, len)
@@ -379,7 +374,7 @@ function square_modulation(freq::Int32, low::UInt8=0x00, high::UInt8=0xFF)
     chandle = Ref(Ptr{Cvoid}(0))
     autd_square_modulation(chandle, freq, low, high)
     Modulation(chandle[])
-end
+    end
 
 function wav_modulation(filename::String)
     len = length(data)
@@ -402,7 +397,7 @@ end
 function add_points(seq::Sequence, points::Array{SVector{3,Float32},1})
     len = length(points)
 
-    points_array = zeros(Float32, len*3)
+    points_array = zeros(Float32, len * 3)
     for (i, point) in enumerate(points)
         points_array[3 * (i - 1) + 1] = point[1]
         points_array[3 * (i - 1) + 2] = point[2]
@@ -418,7 +413,7 @@ end
 
 function get_freq(seq::Sequence)
     autd_sequence_freq(seq._seq_ptr)
-end
+    end
 
 function get_sampling_freq(seq::Sequence)
     autd_sequence_sampling_freq(seq._seq_ptr)
@@ -476,7 +471,7 @@ function append_modulation_sync(autd::AUTD, mod::Modulation)
     autd_append_modulation_sync(autd._handle, mod._mod_ptr)
 end
 
-function append_stm_gain(autd::AUTD, gain::Gain)
+    function append_stm_gain(autd::AUTD, gain::Gain)
     autd_append_stm_gain(autd._handle, gain._gain_ptr)
 end
 
