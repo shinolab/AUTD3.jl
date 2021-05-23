@@ -264,6 +264,7 @@ function custom_gain(data::Array{UInt16,1})
 end
 
 function _pack_foci(foci::Array{SVector{3,Float64},1})
+    len = length(foci)
     foci_array = zeros(Float64, len * 3)
     for (i, focus) in enumerate(foci)
         foci_array[3 * (i - 1) + 1] = focus[1]
@@ -493,42 +494,42 @@ function device_idx_for_trans_idx(autd::AUTD, global_trans_idx::Int32)
 end
 
 function trans_position(autd::AUTD, global_trans_idx::Int32)
-    x = Ptr{Float64}(0)
-    y = Ptr{Float64}(0)
-    z = Ptr{Float64}(0)
+    x = Ref{Float64}(0)
+    y = Ref{Float64}(0)
+    z = Ref{Float64}(0)
     autd_trans_position_by_global(autd._handle, global_trans_idx, x, y, z)
     SVector(x[], y[], z[])
 end
 
 function trans_position(autd::AUTD, device_idx::Int32, local_trans_idx::Int32)
-    x = Ptr{Float64}(0)
-    y = Ptr{Float64}(0)
-    z = Ptr{Float64}(0)
+    x = Ref{Float64}(0)
+    y = Ref{Float64}(0)
+    z = Ref{Float64}(0)
     autd_trans_position_by_local(autd._handle, device_idx, local_trans_idx, x, y, z)
     SVector(x[], y[], z[])
 end
 
 function device_direction_x(autd::AUTD, device_idx::Int32)
-    x = Ptr{Float64}(0)
-    y = Ptr{Float64}(0)
-    z = Ptr{Float64}(0)
-    p = autd_device_x_direction(autd._handle, device_idx, x, y, z)
+    x = Ref{Float64}(0)
+    y = Ref{Float64}(0)
+    z = Ref{Float64}(0)
+    autd_device_x_direction(autd._handle, device_idx, x, y, z)
     SVector(x[], y[], z[])
 end
 
 function device_direction_y(autd::AUTD, device_idx::Int32)
-    x = Ptr{Float64}(0)
-    y = Ptr{Float64}(0)
-    z = Ptr{Float64}(0)
-    p = autd_device_y_direction(autd._handle, device_idx, x, y, z)
-    SVector(x[], y[], z[])
+    x = Ref{Float64}(0)
+    y = Ref{Float64}(0)
+    z = Ref{Float64}(0)
+    autd_device_y_direction(autd._handle, device_idx, x, y, z)
+    SVector(unsafe_load(x), unsafe_load(y), unsafe_load(z))
 end
 
 function device_direction_z(autd::AUTD, device_idx::Int32)
-    x = Ptr{Float64}(0)
-    y = Ptr{Float64}(0)
-    z = Ptr{Float64}(0)
-    p = autd_device_z_direction(autd._handle, device_idx, x, y, z)
+    x = Ref{Float64}(0)
+    y = Ref{Float64}(0)
+    z = Ref{Float64}(0)
+    autd_device_z_direction(autd._handle, device_idx, x, y, z)
     SVector(x[], y[], z[])
 end
 
