@@ -179,6 +179,7 @@ end
 function last_error() 
     size = autd_get_last_error(Ptr{Cvoid}(0))
     err = zeros(UInt8, size)
+    autd_get_last_error(err)
     String(strip(String(err), '\0'))
 end
 
@@ -365,7 +366,7 @@ end
 
 function static_modulation(amp::UInt8=0xFF)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_modulation(chandle, amp)
+    autd_static_modulation(chandle, amp)
     Modulation(chandle[])
 end
 
