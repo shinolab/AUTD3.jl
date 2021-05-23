@@ -1,6 +1,11 @@
 name: build
 
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - v*
+    branches:
+      - 'dev'
 
 jobs:
   test:
@@ -9,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        julia-version: ['1.3.0']
+        julia-version: ['1.6.0']
 
     steps:
       - uses: actions/checkout@v1.0.0

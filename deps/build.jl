@@ -2,7 +2,7 @@ function get_os_info()
     if Sys.iswindows()
         return "win-x64"
     elseif Sys.isapple()
-        return "macos-x64"
+        return "macos-universal"
     elseif Sys.islinux()
         return "linux-x64"
     else
@@ -50,8 +50,7 @@ function extract_zip(zipfile)
 end
 
 function extract_targz(tarfile)
-    lib_ext = get_lib_ext()
-    run(`tar --wildcards -xvf $tarfile bin/"*"$lib_ext`)
+    run(`tar -xvf $tarfile`)
     cp("bin", joinpath(@__DIR__, "..", "src", "bin"); force=true)
     rm("bin"; force=true, recursive=true)
     rm(tarfile; force=true)

@@ -3,7 +3,7 @@
 # Created Date: 30/12/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 30/12/2020
+# Last Modified: 24/05/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -17,12 +17,11 @@ using StaticArrays
 function simple(autd::AUTD) 
     set_silent_mode(autd, true)
 
-    g = focal_point_gain(SVector(90.f0, 80.f0, 150.f0))
+    g = focal_point_gain(SVector(90., 80., 150.))
     freq::Int32 = 150
     m = sine_modulation(freq)
 
-    append_gain_sync(autd, g)
-    append_modulation_sync(autd, m)
+    send(autd, g, m)
     
     println("press enter to exit...")
     readline()
@@ -35,12 +34,11 @@ end
 function bessel(autd::AUTD) 
     set_silent_mode(autd, true)
 
-    g = bessel_beam_gain(SVector(90.f0, 80.f0, 150.f0), SVector(0.f0, 0.f0, 1.f0), 13.0f0 / 180.0f0 * pi)
+    g = bessel_beam_gain(SVector(90., 80., 150.), SVector(0., 0., 1.), 13.0 / 180.0 * pi)
     freq::Int32 = 150
     m = sine_modulation(freq)
 
-    append_gain_sync(autd, g)
-    append_modulation_sync(autd, m)
+    send(autd, g, m)
     
     println("press enter to exit...")
     readline()
@@ -54,16 +52,16 @@ function holo(autd::AUTD)
     set_silent_mode(autd, true)
 
     foci = [
-        SVector(120.f0, 80.f0, 150.f0),
-        SVector(60.f0, 80.f0, 150.f0)
+        SVector(120., 80., 150.),
+        SVector(60., 80., 150.)
     ]
-    amps = [1.0f0, 1.0f0]
-    g = holo_gain(foci, amps)
+    amps = [1.0, 1.0]
+    g = holo_gain_sdp(foci, amps)
+
     freq::Int32 = 150
     m = sine_modulation(freq)
 
-    append_gain_sync(autd, g)
-    append_modulation_sync(autd, m)
+    send(autd, g, m)
     
     println("press enter to exit...")
     readline()
@@ -77,21 +75,23 @@ end
 function stm(autd::AUTD) 
     set_silent_mode(autd, false)
 
-    m = modulation()
-    append_modulation_sync(autd, m)
+    m = static_modulation()
+    send_modulation(autd, m)
 
-    center = SVector(90.f0, 80.f0, 150.f0)
+    center = SVector(90., 80., 150.)
 
-    radius = 30.0f0
+    radius = 30.0
     size = 200
     for i in 1:size
-        theta::Float32 = 2pi * i / size
-        r = center + radius * SVector(cos(theta), sin(theta), 0f0)
+        theta::Float64 = 2pi * i / size
+        r = center + radius * SVector(cos(theta), sin(theta), 0)
         f = focal_point_gain(r)
-        append_stm_gain(autd, f)
+        add_stm_gain(autd, f)
+        dispose(f)
     end
 
-    start_stm(autd, 1f0)
+    freq::Float64 = 1.0
+    start_stm(autd, freq)
     
     println("press enter to exit...")
     readline()
@@ -103,21 +103,23 @@ end
 function seq(autd::AUTD) 
     set_silent_mode(autd, false)
 
-    m = modulation()
-    append_modulation_sync(autd, m)
+    m = static_modulation()
+    send_modulation(autd, m)
 
-    center = SVector(90.f0, 80.f0, 150.f0)
-    normal = SVector(0.f0, 0.f0, 1.f0)
-    radius = 30.0f0
+    center = SVector(90., 80., 150.)
+    normal = SVector(0., 0., 1.)
+    radius = 30.0
     size::UInt64 = 200
     seq = circum_sequence(center, normal, radius, size)
-    set_freq(seq, 200f0)
+    freq::Float64 = 200.0
+    set_freq(seq, freq)
 
-    append_sequence(autd, seq)
+    send_seq(autd, seq)
     
     println("press enter to exit...")
     readline()
 
+    dispose(seq)
     dispose(m)
     stop(autd)
 end
@@ -137,7 +139,7 @@ function run(autd::AUTD)
     end
 
     clear(autd)
-    calibrate(autd)
+    synchronize(autd)
 
     while true
         for (i, (_, name)) in enumerate(samples)
@@ -145,15 +147,14 @@ function run(autd::AUTD)
         end
         println("[Other]: finish")
         print("Choose number: ")
-
+ 
         idx = tryparse(Int64, readline())
-        if idx == nothing || idx > length(samples)
+        if idx === nothing || idx > length(samples) || idx < 1
             break
         end
 
         (fn, _) = samples[idx]
         fn(autd)
-
     end
 
     clear(autd)
@@ -167,7 +168,11 @@ function get_adapter()
     end
 
     print("Input number: ")
-    idx = parse(Int64, readline())
+    idx = tryparse(Int64, readline())
+    if idx === nothing || idx > length(adapters) || idx < 1
+        println("choose correct number!")
+        return ""
+    end
 
     adapters[idx][2]
 end
@@ -175,11 +180,14 @@ end
 function main()
     autd = AUTD()
 
-    add_device(autd, SVector(0.f0, 0.f0, 0.f0), SVector(0.f0, 0.f0, 0.f0))
+    add_device(autd, SVector(0., 0., 0.), SVector(0., 0., 0.))
 
     adapter = get_adapter()
     link = soem_link(adapter, num_devices(autd))
-    open_autd(autd, link)
+    if !open_autd(autd, link)
+        println(last_error())
+        return
+    end
 
     run(autd)
 end
