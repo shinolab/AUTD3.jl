@@ -149,7 +149,7 @@ function run(autd::AUTD)
         print("Choose number: ")
  
         idx = tryparse(Int64, readline())
-        if idx === nothing || idx > length(samples)
+        if idx === nothing || idx > length(samples) || idx < 1
             break
         end
 
@@ -168,7 +168,11 @@ function get_adapter()
     end
 
     print("Input number: ")
-    idx = parse(Int64, readline())
+    idx = tryparse(Int64, readline())
+    if idx === nothing || idx > length(adapters) || idx < 1
+        println("choose correct number!")
+        return ""
+    end
 
     adapters[idx][2]
 end
@@ -177,11 +181,6 @@ function main()
     autd = AUTD()
 
     add_device(autd, SVector(0., 0., 0.), SVector(0., 0., 0.))
-
-    println(device_direction_y(autd, Int32(0)))
-    println(device_direction_z(autd, Int32(0)))
-    println(device_direction_x(autd, Int32(0)))
-    println(trans_position(Int32(1)))
 
     adapter = get_adapter()
     link = soem_link(adapter, num_devices(autd))
