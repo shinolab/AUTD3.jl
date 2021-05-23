@@ -522,7 +522,7 @@ function device_direction_y(autd::AUTD, device_idx::Int32)
     y = Ref{Float64}(0)
     z = Ref{Float64}(0)
     autd_device_y_direction(autd._handle, device_idx, x, y, z)
-    SVector(unsafe_load(x), unsafe_load(y), unsafe_load(z))
+    SVector(x[], y[], z[])
 end
 
 function device_direction_z(autd::AUTD, device_idx::Int32)
