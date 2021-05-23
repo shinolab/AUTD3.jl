@@ -20,6 +20,7 @@ export device_direction_x, device_direction_y, device_direction_z, trans_positio
 export enumerate_adapters, firmware_info_list
 export last_error
 export focal_point_gain, focal_point_gain_with_duty, grouped_gain, bessel_beam_gain, bessel_beam_gain_with_duty, plane_wave_gain,plane_wave_gain_with_duty, custom_gain, holo_gain, transducer_test_gain, null_gain
+export holo_gain_sdp, holo_gain_evd, holo_gain_gs, holo_gain_gspat, holo_gain_lm, holo_gain_naive
 export static_modulation, sine_modulation, custom_modulation, saw_modulation, square_modulation
 export sequence, add_point, add_points, set_freq, get_freq, get_sampling_freq, get_sampling_freq_div, circum_sequence
 export soem_link, twincat_link
