@@ -18,11 +18,12 @@ export open_autd, dispose, add_device, synchronize, clear, set_silent_mode, stop
 export num_devices, num_transducers
 export device_direction_x, device_direction_y, device_direction_z, trans_position, device_idx_for_trans_idx
 export enumerate_adapters, firmware_info_list
-export focal_point_gain, grouped_gain, bessel_beam_gain, plane_wave_gain, custom_gain, holo_gain, transducer_test_gain, null_gain
-export sine_modulation, modulation, custom_modulation, saw_modulation, square_modulation
+export last_error
+export focal_point_gain, focal_point_gain_with_duty, grouped_gain, bessel_beam_gain, bessel_beam_gain_with_duty, plane_wave_gain,plane_wave_gain_with_duty, custom_gain, holo_gain, transducer_test_gain, null_gain
+export static_modulation, sine_modulation, custom_modulation, saw_modulation, square_modulation
 export sequence, add_point, add_points, set_freq, get_freq, get_sampling_freq, get_sampling_freq_div, circum_sequence
 export soem_link, twincat_link
-export send
+export send, send_gain, send_modulation, send_seq
 export add_stm_gain, start_stm, stop_stm, finish_stm
 
 include("NativeMethods.jl")
@@ -221,11 +222,12 @@ function focal_point_gain(position::SVector{3,Float64}; amp::Float64=1.0)
     focal_point_gain_with_duty(position; duty=adjust_amp(amp))
 end
 
-function grouped_gain(group_ids::Array{Int32,1}, gains::Array{Gain,1})
-    len = length(group_ids)
-    gains = map(g -> g._gain_ptr, gains)
+function grouped_gain(group_ids::Array{Tuple{Int32,Gain},1})
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_grouped_gain(chandle, group_ids, gains, len)
+    autd_grouped_gain(chandle)
+    for (id, gain) in group_ids
+        autd_grouped_gain_add(chandle[], id, gain)
+    end
     Gain(chandle[])
 end
 
@@ -237,8 +239,8 @@ function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVe
     Gain(chandle[])
 end
 
-function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVector{3,Float64}, theta_z::Float64; amp::Float64=1.0)
-    bessel_beam_gain(position, direction, theta_z; duty=adjust_amp(amp))
+function bessel_beam_gain(position::SVector{3,Float64}, direction::SVector{3,Float64}, theta_z::Float64; amp::Float64=1.0)
+    bessel_beam_gain_with_duty(position, direction, theta_z; duty=adjust_amp(amp))
 end
 
 function plane_wave_gain_with_duty(direction::SVector{3,Float64}; duty::UInt8)
@@ -269,7 +271,7 @@ function _pack_foci(foci::Array{SVector{3,Float64},1})
     foci_array
 end
 
-function holo_gain_sdp(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; alpha::Float64, lambda::Float64, repeat::UInt64, normalize::Bool)
+function holo_gain_sdp(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; alpha::Float64=1e-3, lambda::Float64=0.9, repeat::UInt64=UInt64(100), normalize::Bool=true)
     len = length(foci)
 
     foci_array = _pack_foci(foci) 
@@ -282,7 +284,7 @@ function holo_gain_sdp(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}
     Gain(chandle[])
 end
 
-function holo_gain_evd(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; gamma::Float64, normalize::Bool)
+function holo_gain_evd(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; gamma::Float64=1.0, normalize::Bool=true)
     len = length(foci)
 
     foci_array = _pack_foci(foci) 
@@ -308,7 +310,7 @@ function holo_gain_naive(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,
     Gain(chandle[])
 end
 
-function holo_gain_gs(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; repeat::UInt64)
+function holo_gain_gs(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; repeat::UInt64=UInt64(100))
     len = length(foci)
 
     foci_array = _pack_foci(foci) 
@@ -321,7 +323,7 @@ function holo_gain_gs(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1};
     Gain(chandle[])
 end
 
-function holo_gain_gspat(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; repeat::UInt64)
+function holo_gain_gspat(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; repeat::UInt64=UInt64(100))
     len = length(foci)
 
     foci_array = _pack_foci(foci) 
@@ -334,7 +336,7 @@ function holo_gain_gspat(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,
     Gain(chandle[])
 end
 
-function holo_gain_lm(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; eps_1::Float64,eps_2::Float64,tau::Float64,k_max::Float64,initial::Array{Float64,1})
+function holo_gain_lm(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}; eps_1::Float64=1e-8,eps_2::Float64=1e-8,tau::Float64=1e-3,k_max::UInt64=UInt64(5),initial::Array{Float64,1}=[])
     len = length(foci)
 
     foci_array = _pack_foci(foci) 
