@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 23/05/2021
+# Last Modified: 24/05/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -155,7 +155,7 @@ function add_device(autd::AUTD, pos::SVector{3,Float64}, qua::SVector{4,Float64}
     autd_add_device_quaternion(autd._handle, x, y, z, qw, qx, qy, qz, group_id)
 end
 
-function synchronize(autd::AUTD, mod_sampling_freq_div::UInt16, mod_buf_size::UInt16)
+function synchronize(autd::AUTD; mod_sampling_freq_div::UInt16=UInt16(10), mod_buf_size::UInt16=UInt16(4000))
     autd_synchronize(autd._handle, mod_sampling_freq_div, mod_buf_size)
 end
 
@@ -446,14 +446,26 @@ function twincat_link()
 Link(chandle[])
 end
 
+function send(autd::AUTD, gain::Gain, mod::Modulation)
+    autd_send_gain_modulation(autd._handle, gain._gain_ptr, mod._mod_ptr)
+end
+
 function send_gain(autd::AUTD, gain::Gain)
     autd_send_gain(autd._handle, gain._gain_ptr)
 end
 
-    function add_stm_gain(autd::AUTD, gain::Gain)
-    autd_add_stm_gain(autd._handle, gain._gain_ptr)
+function send_modulation(autd::AUTD, mod::Modulation)
+    autd_send_modulation(autd._handle,  mod._mod_ptr)
 end
 
+function send_seq(autd::AUTD, seq::Sequence)
+    autd_send_sequence(autd._handle, seq._seq_ptr)
+end
+
+function add_stm_gain(autd::AUTD, gain::Gain)
+    autd_add_stm_gain(autd._handle, gain._gain_ptr)
+end
+ 
 function start_stm(autd::AUTD, freq::Float64)
     autd_start_stm(autd._handle, freq)
 end
@@ -471,18 +483,43 @@ function device_idx_for_trans_idx(autd::AUTD, global_trans_idx::Int32)
 end
 
 function trans_position(autd::AUTD, global_trans_idx::Int32)
-    p = autd_trans_position_by_global(autd._handle, global_trans_idx)
-    SVector(p[1], p[2], p[3])
+    x = Ptr{Float64}(0)
+    y = Ptr{Float64}(0)
+    z = Ptr{Float64}(0)
+    autd_trans_position_by_global(autd._handle, global_trans_idx, x, y, z)
+    SVector(x[], y[], z[])
 end
 
 function trans_position(autd::AUTD, device_idx::Int32, local_trans_idx::Int32)
-    p = autd_trans_position_by_local(autd._handle, device_idx, local_trans_idx)
-    SVector(p[1], p[2], p[3])
+    x = Ptr{Float64}(0)
+    y = Ptr{Float64}(0)
+    z = Ptr{Float64}(0)
+    autd_trans_position_by_local(autd._handle, device_idx, local_trans_idx, x, y, z)
+    SVector(x[], y[], z[])
 end
 
-function device_direction(autd::AUTD, device_idx::Int32)
-    p = autd_device_direction(autd._handle, device_idx)
-    SVector(p[1], p[2], p[3])
+function device_direction_x(autd::AUTD, device_idx::Int32)
+    x = Ptr{Float64}(0)
+    y = Ptr{Float64}(0)
+    z = Ptr{Float64}(0)
+    p = autd_device_x_direction(autd._handle, device_idx, x, y, z)
+    SVector(x[], y[], z[])
+end
+
+function device_direction_y(autd::AUTD, device_idx::Int32)
+    x = Ptr{Float64}(0)
+    y = Ptr{Float64}(0)
+    z = Ptr{Float64}(0)
+    p = autd_device_y_direction(autd._handle, device_idx, x, y, z)
+    SVector(x[], y[], z[])
+end
+
+function device_direction_z(autd::AUTD, device_idx::Int32)
+    x = Ptr{Float64}(0)
+    y = Ptr{Float64}(0)
+    z = Ptr{Float64}(0)
+    p = autd_device_z_direction(autd._handle, device_idx, x, y, z)
+    SVector(x[], y[], z[])
 end
 
 end
