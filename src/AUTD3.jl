@@ -175,6 +175,12 @@ function is_open(autd::AUTD)
     autd_is_open(autd._handle)
 end
 
+function last_error() 
+    size = autd_get_last_error(Ptr{Cvoid}(0))
+    err = zeros(UInt8, size)
+    String(strip(String(err), '\0'))
+end
+
 function set_silent_mode(autd::AUTD, silent::Bool)
     autd_set_silent_mode(autd._handle, silent)
 end
@@ -231,7 +237,7 @@ function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVe
     Gain(chandle[])
 end
 
-function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVector{3,Float64}, theta_z::Float64; amp::Float64=1.0f0)
+function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVector{3,Float64}, theta_z::Float64; amp::Float64=1.0)
     bessel_beam_gain(position, direction, theta_z; duty=adjust_amp(amp))
 end
 
@@ -242,7 +248,7 @@ function plane_wave_gain_with_duty(direction::SVector{3,Float64}; duty::UInt8)
     Gain(chandle[])
 end
 
-function plane_wave_gain(direction::SVector{3,Float64}; amp::Float64=1.0f0)
+function plane_wave_gain(direction::SVector{3,Float64}; amp::Float64=1.0)
     plane_wave_gain_with_duty(direction; duty=adjust_amp(amp))
 end
 
@@ -374,7 +380,7 @@ function saw_modulation(freq::Int32)
     Modulation(chandle[])
 end
 
-function sine_modulation(freq::Int32, amp::Float64=1.0f0, offset::Float64=0.5f0)
+function sine_modulation(freq::Int32, amp::Float64=1.0, offset::Float64=0.5)
     chandle = Ref(Ptr{Cvoid}(0))
     autd_sine_modulation(chandle, freq, amp, offset)
     Modulation(chandle[])
