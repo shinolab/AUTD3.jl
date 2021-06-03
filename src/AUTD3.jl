@@ -473,9 +473,9 @@ function circum_sequence(center::SVector{3,Float64}, normal::SVector{3,Float64},
     Sequence(chandle[])
 end
 
-function soem_link(ifname::String, device_num::Int32)
+function soem_link(ifname::String, device_num::Int32, cycle_ticks::UInt32)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_soem_link(chandle, ifname, device_num)
+    autd_soem_link(chandle, ifname, device_num, cycle_ticks)
 Link(chandle[])
 end
 
