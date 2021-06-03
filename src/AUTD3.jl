@@ -25,7 +25,7 @@ export static_modulation, sine_modulation, custom_modulation, saw_modulation, sq
 export sequence, add_point, add_points, set_freq, get_freq, get_sampling_freq, get_sampling_freq_div, circum_sequence
 export soem_link, twincat_link
 export send, send_gain, send_modulation, send_seq
-export add_stm_gain, start_stm, stop_stm, finish_stm
+export stm, add_stm_gain, start_stm, stop_stm, finish_stm
 
 include("NativeMethods.jl")
 

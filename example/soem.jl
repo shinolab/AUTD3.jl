@@ -72,7 +72,7 @@ function holo(autd::AUTD)
 end
 
 
-function stm(autd::AUTD) 
+function stm_test(autd::AUTD) 
     set_silent_mode(autd, false)
 
     m = static_modulation()
@@ -133,7 +133,7 @@ function run(autd::AUTD)
         (simple, "Single Focal Point Sample"),
         (bessel, "Bessel beam Sample"),
         (holo, "Multiple Focal Points Sample"),
-        (stm, "Spatio-Temporal Modulation Sample"),
+        (stm_test, "Spatio-Temporal Modulation Sample"),
         (seq, "PointSequence (Hardware STM) Sample")
     ]
     
