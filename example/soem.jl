@@ -3,7 +3,7 @@
 # Created Date: 30/12/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 24/05/2021
+# Last Modified: 03/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -72,7 +72,7 @@ function holo(autd::AUTD)
 end
 
 
-function stm(autd::AUTD) 
+function stm_test(autd::AUTD) 
     set_silent_mode(autd, false)
 
     m = static_modulation()
@@ -82,19 +82,23 @@ function stm(autd::AUTD)
 
     radius = 30.0
     size = 200
+    stm_cnt = stm(autd)
     for i in 1:size
         theta::Float64 = 2pi * i / size
         r = center + radius * SVector(cos(theta), sin(theta), 0)
         f = focal_point_gain(r)
-        add_stm_gain(autd, f)
+        add_stm_gain(stm_cnt, f)
         dispose(f)
     end
 
     freq::Float64 = 1.0
-    start_stm(autd, freq)
+    start_stm(stm_cnt, freq)
     
     println("press enter to exit...")
     readline()
+
+    stop_stm(stm_cnt)
+    finish_stm(stm_cnt)
 
     dispose(m)
     stop(autd)
@@ -129,7 +133,7 @@ function run(autd::AUTD)
         (simple, "Single Focal Point Sample"),
         (bessel, "Bessel beam Sample"),
         (holo, "Multiple Focal Points Sample"),
-        (stm, "Spatio-Temporal Modulation Sample"),
+        (stm_test, "Spatio-Temporal Modulation Sample"),
         (seq, "PointSequence (Hardware STM) Sample")
     ]
     
@@ -183,7 +187,7 @@ function main()
     add_device(autd, SVector(0., 0., 0.), SVector(0., 0., 0.))
 
     adapter = get_adapter()
-    link = soem_link(adapter, num_devices(autd))
+    link = soem_link(adapter, num_devices(autd), UInt32(1))
     if !open_autd(autd, link)
         println(last_error())
         return

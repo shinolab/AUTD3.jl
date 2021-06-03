@@ -44,9 +44,13 @@ autd_is_open(handle) = ccall((:AUTDIsOpen,  _autd3capi), Bool, (Ptr{Cvoid},), ha
 
 autd_is_silent_mode(handle) = ccall((:AUTDIsSilentMode,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
+autd_is_force_fan(handle) = ccall((:AUTDIsForceFan,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
+
 autd_set_silent_mode(handle,mode) = ccall((:AUTDSetSilentMode,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, mode)
 
 autd_set_read_fpga_info(handle,reads_fpga_info) = ccall((:AUTDSetReadFPGAInfo,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, reads_fpga_info)
+
+autd_set_force_fan(handle,force) = ccall((:AUTDSetForceFan,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, force)
 
 autd_wavelength(handle) = ccall((:AUTDWavelength,  _autd3capi), Float64, (Ptr{Cvoid},), handle)
 
@@ -144,7 +148,9 @@ autd_send_gain_modulation(handle,gain,mod) = ccall((:AUTDSendGainModulation,  _a
 
 autd_send_sequence(handle,seq) = ccall((:AUTDSendSequence,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{Cvoid},), handle, seq)
 
-autd_add_stm_gain(handle,gain) = ccall((:AUTDAddSTMGain,  _autd3capi), Cvoid, (Ptr{Cvoid}, Ptr{Cvoid},), handle, gain)
+autd_stm_controller(out,handle) = ccall((:AUTDSTMController,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid},), out, handle)
+
+autd_add_stm_gain(handle,gain) = ccall((:AUTDAddSTMGain,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{Cvoid},), handle, gain)
 
 autd_start_stm(handle,freq) = ccall((:AUTDStartSTM,  _autd3capi), Bool, (Ptr{Cvoid}, Float64,), handle, freq)
 
@@ -169,6 +175,8 @@ autd_holo_gain_gspat(gain,backend,points,amps,size,repeat) = ccall((:AUTDHoloGai
 
 autd_holo_gain_lm(gain,backend,points,amps,size,eps_1,eps_2,tau,k_max,initial,initial_size) = ccall((:AUTDHoloGainLM,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Float64, Float64, UInt64, Ptr{Float64}, Int32,), gain, backend, points, amps, size, eps_1, eps_2, tau, k_max, initial, initial_size)
 
+autd_holo_gain_greedy(gain,points,amps,size,phase_div) = ccall((:AUTDHoloGainGreedy,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Float64}, Ptr{Float64}, Int32, Int32,), gain, points, amps, size, phase_div)
+
 const _autd3capi_soem_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-soem-link" * get_lib_ext())
 autd_get_adapter_pointer(out) = ccall((:AUTDGetAdapterPointer,  _autd3capi_soem_link), Int32, (Ref{Ptr{Cvoid}},), out)
 
@@ -176,7 +184,7 @@ autd_get_adapter(p_adapter,index,desc,name) = ccall((:AUTDGetAdapter,  _autd3cap
 
 autd_free_adapter_pointer(p_adapter) = ccall((:AUTDFreeAdapterPointer,  _autd3capi_soem_link), Cvoid, (Ptr{Cvoid},), p_adapter)
 
-autd_soem_link(out,ifname,device_num) = ccall((:AUTDSOEMLink,  _autd3capi_soem_link), Cvoid, (Ref{Ptr{Cvoid}}, Cstring, Int32,), out, ifname, device_num)
+autd_soem_link(out,ifname,device_num,cycle_ticks) = ccall((:AUTDSOEMLink,  _autd3capi_soem_link), Cvoid, (Ref{Ptr{Cvoid}}, Cstring, Int32, UInt32,), out, ifname, device_num, cycle_ticks)
 
 const _autd3capi_twincat_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-twincat-link" * get_lib_ext())
 autd_twincat_link(out) = ccall((:AUTDTwinCATLink,  _autd3capi_twincat_link), Cvoid, (Ref{Ptr{Cvoid}},), out)

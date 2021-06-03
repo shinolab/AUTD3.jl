@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 24/05/2021
+# Last Modified: 03/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -25,7 +25,7 @@ export static_modulation, sine_modulation, custom_modulation, saw_modulation, sq
 export sequence, add_point, add_points, set_freq, get_freq, get_sampling_freq, get_sampling_freq_div, circum_sequence
 export soem_link, twincat_link
 export send, send_gain, send_modulation, send_seq
-export add_stm_gain, start_stm, stop_stm, finish_stm
+export stm, add_stm_gain, start_stm, stop_stm, finish_stm
 
 include("NativeMethods.jl")
 
@@ -75,6 +75,13 @@ mutable struct AUTD
         autd = new(chandle[], false)
         finalizer(autd -> dispose(autd), autd)
         autd
+    end
+end
+
+mutable struct STMController
+    _handle::Ptr{Cvoid}
+    function STMController(handle::Ptr{Cvoid})
+        new(handle)
     end
 end
 
@@ -190,6 +197,14 @@ end
 
 function is_silent_mode(autd::AUTD)
     autd_is_silent_mode(autd._handle)
+end
+
+function set_force_fan(autd::AUTD, force_fan::Bool)
+    autd_set_force_fan(autd._handle, force_fan)
+end
+
+function is_force_fan(autd::AUTD)
+    autd_is_force_fan(autd._handle)
 end
 
 function wavelength(autd::AUTD)
@@ -354,6 +369,19 @@ function holo_gain_lm(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1};
 Gain(chandle[])
 end
 
+function holo_gain_greedy(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}, phase_div::Int32)
+    len = length(foci)
+
+    foci_array = _pack_foci(foci) 
+    backend = Ref(Ptr{Cvoid}(0))
+    autd_eigen_backend(backend)
+
+    chandle = Ref(Ptr{Cvoid}(0))
+    autd_holo_gain_greedy(chandle, foci_array, amps, len, phase_div)
+    autd_delete_backend(backend[])
+Gain(chandle[])
+end
+
 function transducer_test_gain(trans_idx::Int32, duty::UInt8, phase::UInt8)
     chandle = Ref(Ptr{Cvoid}(0))
     autd_transducer_test_gain(chandle, trans_idx, duty, phase)
@@ -445,9 +473,9 @@ function circum_sequence(center::SVector{3,Float64}, normal::SVector{3,Float64},
     Sequence(chandle[])
 end
 
-function soem_link(ifname::String, device_num::Int32)
+function soem_link(ifname::String, device_num::Int32, cycle_ticks::UInt32)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_soem_link(chandle, ifname, device_num)
+    autd_soem_link(chandle, ifname, device_num, cycle_ticks)
 Link(chandle[])
 end
 
@@ -473,20 +501,26 @@ function send_seq(autd::AUTD, seq::Sequence)
     autd_send_sequence(autd._handle, seq._seq_ptr)
 end
 
-function add_stm_gain(autd::AUTD, gain::Gain)
-    autd_add_stm_gain(autd._handle, gain._gain_ptr)
+function stm(autd::AUTD)
+    chandle = Ref(Ptr{Cvoid}(0))
+    autd_stm_controller(chandle, autd._handle)
+    STMController(chandle[])
+end
+
+function add_stm_gain(stm::STMController, gain::Gain)
+    autd_add_stm_gain(stm._handle, gain._gain_ptr)
 end
  
-function start_stm(autd::AUTD, freq::Float64)
-    autd_start_stm(autd._handle, freq)
+function start_stm(stm::STMController, freq::Float64)
+    autd_start_stm(stm._handle, freq)
 end
 
-function stop_stm(autd::AUTD)
-    autd_stop_stm(autd._handle)
+function stop_stm(stm::STMController)
+    autd_stop_stm(stm._handle)
 end
 
-function finish_stm(autd::AUTD)
-    autd_finish_stm(autd._handle)
+function finish_stm(stm::STMController)
+    autd_finish_stm(stm._handle)
 end
 
 function device_idx_for_trans_idx(autd::AUTD, global_trans_idx::Int32)
