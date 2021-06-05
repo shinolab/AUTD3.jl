@@ -46,17 +46,23 @@ autd_is_silent_mode(handle) = ccall((:AUTDIsSilentMode,  _autd3capi), Bool, (Ptr
 
 autd_is_force_fan(handle) = ccall((:AUTDIsForceFan,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
+autd_is_reads_fpga_info(handle) = ccall((:AUTDIsReadsFPGAInfo,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
+
 autd_set_silent_mode(handle,mode) = ccall((:AUTDSetSilentMode,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, mode)
 
-autd_set_read_fpga_info(handle,reads_fpga_info) = ccall((:AUTDSetReadFPGAInfo,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, reads_fpga_info)
+autd_set_reads_fpga_info(handle,reads_fpga_info) = ccall((:AUTDSetReadsFPGAInfo,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, reads_fpga_info)
 
 autd_set_force_fan(handle,force) = ccall((:AUTDSetForceFan,  _autd3capi), Cvoid, (Ptr{Cvoid}, Bool,), handle, force)
 
-autd_wavelength(handle) = ccall((:AUTDWavelength,  _autd3capi), Float64, (Ptr{Cvoid},), handle)
+autd_get_wavelength(handle) = ccall((:AUTDGetWavelength,  _autd3capi), Float64, (Ptr{Cvoid},), handle)
+
+autd_get_attenuation(handle) = ccall((:AUTDGetAttenuation,  _autd3capi), Float64, (Ptr{Cvoid},), handle)
 
 autd_set_wavelength(handle,wavelength) = ccall((:AUTDSetWavelength,  _autd3capi), Cvoid, (Ptr{Cvoid}, Float64,), handle, wavelength)
 
-autd_read_fpga_info(handle,out) = ccall((:AUTDReadFPGAInfo,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, out)
+autd_set_attenuation(handle,attenuation) = ccall((:AUTDSetAttenuation,  _autd3capi), Cvoid, (Ptr{Cvoid}, Float64,), handle, attenuation)
+
+autd_get_fpga_info(handle,out) = ccall((:AUTDGetFPGAInfo,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, out)
 
 autd_update_ctrl_flags(handle) = ccall((:AUTDUpdateCtrlFlags,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
@@ -86,33 +92,33 @@ autd_get_firmware_info(p_firm_info_list,index,cpu_ver,fpga_ver) = ccall((:AUTDGe
 
 autd_free_firmware_info_list_pointer(p_firm_info_list) = ccall((:AUTDFreeFirmwareInfoListPointer,  _autd3capi), Cvoid, (Ptr{Cvoid},), p_firm_info_list)
 
-autd_null_gain(gain) = ccall((:AUTDNullGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}},), gain)
+autd_gain_null(gain) = ccall((:AUTDGainNull,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}},), gain)
 
-autd_grouped_gain(gain) = ccall((:AUTDGroupedGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}},), gain)
+autd_gain_grouped(gain) = ccall((:AUTDGainGrouped,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}},), gain)
 
-autd_grouped_gain_add(grouped_gain,id,gain) = ccall((:AUTDGroupedGainAdd,  _autd3capi), Cvoid, (Ptr{Cvoid}, Int32, Ptr{Cvoid},), grouped_gain, id, gain)
+autd_gain_grouped_add(grouped_gain,id,gain) = ccall((:AUTDGainGroupedAdd,  _autd3capi), Cvoid, (Ptr{Cvoid}, Int32, Ptr{Cvoid},), grouped_gain, id, gain)
 
-autd_focal_point_gain(gain,x,y,z,duty) = ccall((:AUTDFocalPointGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, UInt8,), gain, x, y, z, duty)
+autd_gain_focal_point(gain,x,y,z,duty) = ccall((:AUTDGainFocalPoint,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, UInt8,), gain, x, y, z, duty)
 
-autd_bessel_beam_gain(gain,x,y,z,n_x,n_y,n_z,theta_z,duty) = ccall((:AUTDBesselBeamGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, Float64, Float64, Float64, Float64, UInt8,), gain, x, y, z, n_x, n_y, n_z, theta_z, duty)
+autd_gain_bessel_beam(gain,x,y,z,n_x,n_y,n_z,theta_z,duty) = ccall((:AUTDGainBesselBeam,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, Float64, Float64, Float64, Float64, UInt8,), gain, x, y, z, n_x, n_y, n_z, theta_z, duty)
 
-autd_plane_wave_gain(gain,n_x,n_y,n_z,duty) = ccall((:AUTDPlaneWaveGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, UInt8,), gain, n_x, n_y, n_z, duty)
+autd_gain_plane_wave(gain,n_x,n_y,n_z,duty) = ccall((:AUTDGainPlaneWave,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, UInt8,), gain, n_x, n_y, n_z, duty)
 
-autd_custom_gain(gain,data,data_length) = ccall((:AUTDCustomGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{UInt16}, Int32,), gain, data, data_length)
+autd_gain_custom(gain,data,data_length) = ccall((:AUTDGainCustom,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{UInt16}, Int32,), gain, data, data_length)
 
-autd_transducer_test_gain(gain,idx,duty,phase) = ccall((:AUTDTransducerTestGain,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, UInt8, UInt8,), gain, idx, duty, phase)
+autd_gain_transducer_test(gain,idx,duty,phase) = ccall((:AUTDGainTransducerTest,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, UInt8, UInt8,), gain, idx, duty, phase)
 
 autd_delete_gain(gain) = ccall((:AUTDDeleteGain,  _autd3capi), Cvoid, (Ptr{Cvoid},), gain)
 
-autd_static_modulation(mod,amp) = ccall((:AUTDStaticModulation,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, UInt8,), mod, amp)
+autd_modulation_static(mod,amp) = ccall((:AUTDModulationStatic,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, UInt8,), mod, amp)
 
-autd_custom_modulation(mod,buf,size) = ccall((:AUTDCustomModulation,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{UInt8}, UInt32,), mod, buf, size)
+autd_modulation_custom(mod,buf,size) = ccall((:AUTDModulationCustom,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{UInt8}, UInt32,), mod, buf, size)
 
-autd_saw_modulation(mod,freq) = ccall((:AUTDSawModulation,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32,), mod, freq)
+autd_modulation_sine(mod,freq,amp,offset) = ccall((:AUTDModulationSine,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, Float64, Float64,), mod, freq, amp, offset)
 
-autd_sine_modulation(mod,freq,amp,offset) = ccall((:AUTDSineModulation,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, Float64, Float64,), mod, freq, amp, offset)
+autd_modulation_sine_pressure(mod,freq,amp,offset) = ccall((:AUTDModulationSinePressure,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, Float64, Float64,), mod, freq, amp, offset)
 
-autd_square_modulation(mod,freq,low,high) = ccall((:AUTDSquareModulation,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, UInt8, UInt8,), mod, freq, low, high)
+autd_modulation_square(mod,freq,low,high) = ccall((:AUTDModulationSquare,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Int32, UInt8, UInt8,), mod, freq, low, high)
 
 autd_delete_modulation(mod) = ccall((:AUTDDeleteModulation,  _autd3capi), Cvoid, (Ptr{Cvoid},), mod)
 
@@ -163,19 +169,19 @@ autd_eigen_backend(out) = ccall((:AUTDEigen3Backend,  _autd3capi_holo_gain), Cvo
 
 autd_delete_backend(backend) = ccall((:AUTDDeleteBackend,  _autd3capi_holo_gain), Cvoid, (Ptr{Cvoid},), backend)
 
-autd_holo_gain_sdp(gain,backend,points,amps,size,alpha,lambda,repeat,normalize) = ccall((:AUTDHoloGainSDP,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Float64, UInt64, Bool,), gain, backend, points, amps, size, alpha, lambda, repeat, normalize)
+autd_gain_holo_sdp(gain,backend,points,amps,size,alpha,lambda,repeat,normalize) = ccall((:AUTDGainHoloSDP,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Float64, UInt64, Bool,), gain, backend, points, amps, size, alpha, lambda, repeat, normalize)
 
-autd_holo_gain_evd(gain,backend,points,amps,size,gamma,normalize) = ccall((:AUTDHoloGainEVD,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Bool,), gain, backend, points, amps, size, gamma, normalize)
+autd_gain_holo_evd(gain,backend,points,amps,size,gamma,normalize) = ccall((:AUTDGainHoloEVD,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Bool,), gain, backend, points, amps, size, gamma, normalize)
 
-autd_holo_gain_naive(gain,backend,points,amps,size) = ccall((:AUTDHoloGainNaive,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32,), gain, backend, points, amps, size)
+autd_gain_holo_naive(gain,backend,points,amps,size) = ccall((:AUTDGainHoloNaive,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32,), gain, backend, points, amps, size)
 
-autd_holo_gain_gs(gain,backend,points,amps,size,repeat) = ccall((:AUTDHoloGainGS,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, UInt64,), gain, backend, points, amps, size, repeat)
+autd_gain_holo_gs(gain,backend,points,amps,size,repeat) = ccall((:AUTDGainHoloGS,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, UInt64,), gain, backend, points, amps, size, repeat)
 
-autd_holo_gain_gspat(gain,backend,points,amps,size,repeat) = ccall((:AUTDHoloGainGSPAT,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, UInt64,), gain, backend, points, amps, size, repeat)
+autd_gain_holo_gspat(gain,backend,points,amps,size,repeat) = ccall((:AUTDGainHoloGSPAT,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, UInt64,), gain, backend, points, amps, size, repeat)
 
-autd_holo_gain_lm(gain,backend,points,amps,size,eps_1,eps_2,tau,k_max,initial,initial_size) = ccall((:AUTDHoloGainLM,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Float64, Float64, UInt64, Ptr{Float64}, Int32,), gain, backend, points, amps, size, eps_1, eps_2, tau, k_max, initial, initial_size)
+autd_gain_holo_lm(gain,backend,points,amps,size,eps_1,eps_2,tau,k_max,initial,initial_size) = ccall((:AUTDGainHoloLM,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Cvoid}, Ptr{Float64}, Ptr{Float64}, Int32, Float64, Float64, Float64, UInt64, Ptr{Float64}, Int32,), gain, backend, points, amps, size, eps_1, eps_2, tau, k_max, initial, initial_size)
 
-autd_holo_gain_greedy(gain,points,amps,size,phase_div) = ccall((:AUTDHoloGainGreedy,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Float64}, Ptr{Float64}, Int32, Int32,), gain, points, amps, size, phase_div)
+autd_gain_holo_greedy(gain,points,amps,size,phase_div) = ccall((:AUTDGainHoloGreedy,  _autd3capi_holo_gain), Cvoid, (Ref{Ptr{Cvoid}}, Ptr{Float64}, Ptr{Float64}, Int32, Int32,), gain, points, amps, size, phase_div)
 
 const _autd3capi_soem_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-soem-link" * get_lib_ext())
 autd_get_adapter_pointer(out) = ccall((:AUTDGetAdapterPointer,  _autd3capi_soem_link), Int32, (Ref{Ptr{Cvoid}},), out)
@@ -184,9 +190,7 @@ autd_get_adapter(p_adapter,index,desc,name) = ccall((:AUTDGetAdapter,  _autd3cap
 
 autd_free_adapter_pointer(p_adapter) = ccall((:AUTDFreeAdapterPointer,  _autd3capi_soem_link), Cvoid, (Ptr{Cvoid},), p_adapter)
 
-autd_soem_link(out,ifname,device_num,cycle_ticks) = ccall((:AUTDSOEMLink,  _autd3capi_soem_link), Cvoid, (Ref{Ptr{Cvoid}}, Cstring, Int32, UInt32,), out, ifname, device_num, cycle_ticks)
+autd_link_soem(out,ifname,device_num,cycle_ticks) = ccall((:AUTDLinkSOEM,  _autd3capi_soem_link), Cvoid, (Ref{Ptr{Cvoid}}, Cstring, Int32, UInt32,), out, ifname, device_num, cycle_ticks)
 
 const _autd3capi_twincat_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-twincat-link" * get_lib_ext())
-autd_twincat_link(out) = ccall((:AUTDTwinCATLink,  _autd3capi_twincat_link), Cvoid, (Ref{Ptr{Cvoid}},), out)
-
-
+autd_link_twincat(out) = ccall((:AUTDLinkTwinCAT,  _autd3capi_twincat_link), Cvoid, (Ref{Ptr{Cvoid}},), out)
