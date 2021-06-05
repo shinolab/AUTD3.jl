@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 03/06/2021
+# Last Modified: 05/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -208,11 +208,19 @@ function is_force_fan(autd::AUTD)
 end
 
 function wavelength(autd::AUTD)
-    autd_wavelength(autd._handle)
+    autd_get_wavelength(autd._handle)
 end
 
 function set_wavelength(autd::AUTD, wavelength::Float64)
     autd_set_wavelength(autd._handle, wavelength)
+end
+
+function attenuation(autd::AUTD)
+    autd_get_attenuation(autd._handle)
+end
+
+function set_attenuation(autd::AUTD, attenuation::Float64)
+    autd_set_attenuation(autd._handle, attenuation)
 end
 
 function num_devices(autd::AUTD)
@@ -231,7 +239,7 @@ end
 function focal_point_gain_with_duty(position::SVector{3,Float64}; duty::UInt8)
     x, y, z = position
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_focal_point_gain(chandle, x, y, z, duty)
+    autd_gain_focal_point(chandle, x, y, z, duty)
     Gain(chandle[])
 end
 
@@ -241,9 +249,9 @@ end
 
 function grouped_gain(group_ids::Array{Tuple{Int32,Gain},1})
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_grouped_gain(chandle)
+    autd_gain_grouped(chandle)
     for (id, gain) in group_ids
-        autd_grouped_gain_add(chandle[], id, gain)
+        autd_gain_grouped_add(chandle[], id, gain)
     end
     Gain(chandle[])
 end
@@ -252,7 +260,7 @@ function bessel_beam_gain_with_duty(position::SVector{3,Float64}, direction::SVe
     x, y, z = position
     nx, ny, nz = direction
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_bessel_beam_gain(chandle, x, y, z, nx, ny, nz, theta_z, duty)
+    autd_gain_bessel_beam(chandle, x, y, z, nx, ny, nz, theta_z, duty)
     Gain(chandle[])
 end
 
@@ -263,7 +271,7 @@ end
 function plane_wave_gain_with_duty(direction::SVector{3,Float64}; duty::UInt8)
     nx, ny, nz = direction
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_plane_wave_gain(chandle, nx, ny, nz, duty)
+    autd_gain_plane_wave(chandle, nx, ny, nz, duty)
     Gain(chandle[])
 end
 
@@ -274,7 +282,7 @@ end
 function custom_gain(data::Array{UInt16,1})
     len = length(data)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_custom_gain(chandle, data, len)
+    autd_gain_custom(chandle, data, len)
     Gain(chandle[])
 end
 
@@ -297,7 +305,7 @@ function holo_gain_sdp(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_sdp(chandle, backend[], foci_array, amps, len, alpha, lambda, repeat, normalize)
+    autd_gain_holo_sdp(chandle, backend[], foci_array, amps, len, alpha, lambda, repeat, normalize)
     autd_delete_backend(backend[])
     Gain(chandle[])
 end
@@ -310,7 +318,7 @@ function holo_gain_evd(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1}
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_evd(chandle, backend[], foci_array, amps, len, gamma, normalize)
+    autd_gain_holo_evd(chandle, backend[], foci_array, amps, len, gamma, normalize)
     autd_delete_backend(backend[])
     Gain(chandle[])
 end
@@ -323,7 +331,7 @@ function holo_gain_naive(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_naive(chandle, backend[], foci_array, amps, len)
+    autd_gain_holo_naive(chandle, backend[], foci_array, amps, len)
     autd_delete_backend(backend[])
     Gain(chandle[])
 end
@@ -336,7 +344,7 @@ function holo_gain_gs(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1};
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_gs(chandle, backend[], foci_array, amps, len, repeat)
+    autd_gain_holo_gs(chandle, backend[], foci_array, amps, len, repeat)
     autd_delete_backend(backend[])
     Gain(chandle[])
 end
@@ -349,7 +357,7 @@ function holo_gain_gspat(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_gspat(chandle, backend[], foci_array, amps, len, repeat)
+    autd_gain_holo_gspat(chandle, backend[], foci_array, amps, len, repeat)
     autd_delete_backend(backend[])
     Gain(chandle[])
 end
@@ -364,7 +372,7 @@ function holo_gain_lm(foci::Array{SVector{3,Float64},1}, amps::Array{Float64,1};
     chandle = Ref(Ptr{Cvoid}(0))
     initial_len = length(initial)
     init = initial_len == 0 ? Ptr{Cvoid}(0) : initial
-    autd_holo_gain_lm(chandle, backend[], foci_array, amps, len, eps_1, eps_2, tau, k_max, init, initial_len)
+    autd_gain_holo_lm(chandle, backend[], foci_array, amps, len, eps_1, eps_2, tau, k_max, init, initial_len)
     autd_delete_backend(backend[])
 Gain(chandle[])
 end
@@ -377,51 +385,45 @@ function holo_gain_greedy(foci::Array{SVector{3,Float64},1}, amps::Array{Float64
     autd_eigen_backend(backend)
 
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_holo_gain_greedy(chandle, foci_array, amps, len, phase_div)
+    autd_gain_holo_greedy(chandle, foci_array, amps, len, phase_div)
     autd_delete_backend(backend[])
 Gain(chandle[])
 end
 
 function transducer_test_gain(trans_idx::Int32, duty::UInt8, phase::UInt8)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_transducer_test_gain(chandle, trans_idx, duty, phase)
+    autd_gain_transducer_test(chandle, trans_idx, duty, phase)
 Gain(chandle[])
 end
 
 function null_gain()
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_null_gain(chandle)
+    autd_gain_null(chandle)
 Gain(chandle[])
 end
 
 function static_modulation(amp::UInt8=0xFF)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_static_modulation(chandle, amp)
+    autd_modulation_static(chandle, amp)
     Modulation(chandle[])
 end
 
 function custom_modulation(data::Array{UInt8,1})
     len = length(data)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_custom_modulation(chandle, data, len)
-    Modulation(chandle[])
-end
-
-function saw_modulation(freq::Int32)
-    chandle = Ref(Ptr{Cvoid}(0))
-    autd_saw_modulation(chandle, freq)
+    autd_modulation_custom(chandle, data, len)
     Modulation(chandle[])
 end
 
 function sine_modulation(freq::Int32, amp::Float64=1.0, offset::Float64=0.5)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_sine_modulation(chandle, freq, amp, offset)
+    autd_modulation_sine(chandle, freq, amp, offset)
     Modulation(chandle[])
 end
 
 function square_modulation(freq::Int32, low::UInt8=0x00, high::UInt8=0xFF)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_square_modulation(chandle, freq, low, high)
+    autd_modulation_square(chandle, freq, low, high)
     Modulation(chandle[])
 end
 
@@ -475,13 +477,13 @@ end
 
 function soem_link(ifname::String, device_num::Int32, cycle_ticks::UInt32)
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_soem_link(chandle, ifname, device_num, cycle_ticks)
+    autd_link_soem(chandle, ifname, device_num, cycle_ticks)
 Link(chandle[])
 end
 
 function twincat_link()
     chandle = Ref(Ptr{Cvoid}(0))
-    autd_twincat_link(chandle)
+    autd_link_twincat(chandle)
 Link(chandle[])
 end
 
