@@ -3,7 +3,7 @@
 # Created Date: 30/12/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 03/06/2021
+# Last Modified: 18/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -143,7 +143,6 @@ function run(autd::AUTD)
     end
 
     clear(autd)
-    synchronize(autd)
 
     while true
         for (i, (_, name)) in enumerate(samples)

@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 05/06/2021
+# Last Modified: 18/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -162,10 +162,6 @@ function add_device(autd::AUTD, pos::SVector{3,Float64}, qua::SVector{4,Float64}
     x, y, z = pos
     qw, qx, qy, qz = qua
     autd_add_device_quaternion(autd._handle, x, y, z, qw, qx, qy, qz, group_id)
-end
-
-function synchronize(autd::AUTD; mod_sampling_freq_div::UInt16=UInt16(10), mod_buf_size::UInt16=UInt16(4000))
-    autd_synchronize(autd._handle, mod_sampling_freq_div, mod_buf_size)
 end
 
 function clear(autd::AUTD)

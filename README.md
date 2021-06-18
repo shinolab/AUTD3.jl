@@ -4,7 +4,7 @@
 
 [autd3 library](https://github.com/shinolab/autd3-library-software) wrapper for Julia 1.6
 
-version: 1.2.0
+version: 1.3.0
 
 ## :hammer_and_wrench: Install
 

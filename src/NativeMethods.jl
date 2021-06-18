@@ -32,8 +32,6 @@ autd_delete_device(handle,idx) = ccall((:AUTDDeleteDevice,  _autd3capi), Int32, 
 
 autd_clear_devices(handle) = ccall((:AUTDClearDevices,  _autd3capi), Cvoid, (Ptr{Cvoid},), handle)
 
-autd_synchronize(handle,mod_smpl_freq_div,mod_buf_size) = ccall((:AUTDSynchronize,  _autd3capi), Bool, (Ptr{Cvoid}, UInt16, UInt16,), handle, mod_smpl_freq_div, mod_buf_size)
-
 autd_close_controller(handle) = ccall((:AUTDCloseController,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
 autd_clear(handle) = ccall((:AUTDClear,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
@@ -66,7 +64,7 @@ autd_get_fpga_info(handle,out) = ccall((:AUTDGetFPGAInfo,  _autd3capi), Bool, (P
 
 autd_update_ctrl_flags(handle) = ccall((:AUTDUpdateCtrlFlags,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
-autd_set_output_delay(handle,delay) = ccall((:AUTDSetOutputDelay,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt16},), handle, delay)
+autd_set_output_delay(handle,delay) = ccall((:AUTDSetOutputDelay,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, delay)
 
 autd_get_last_error(error) = ccall((:AUTDGetLastError,  _autd3capi), Int32, (Ref{UInt8},), error)
 
