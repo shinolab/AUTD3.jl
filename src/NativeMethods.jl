@@ -65,6 +65,8 @@ autd_get_fpga_info(handle,out) = ccall((:AUTDGetFPGAInfo,  _autd3capi), Bool, (P
 autd_update_ctrl_flags(handle) = ccall((:AUTDUpdateCtrlFlags,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
 autd_set_output_delay(handle,delay) = ccall((:AUTDSetOutputDelay,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, delay)
+autd_set_enable(handle,enable) = ccall((:AUTDSetEnable,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, enable)
+autd_set_delay_enable(handle,delay_enable) = ccall((:AUTDSetDelayEnable,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt16},), handle, delay_enable)
 
 autd_get_last_error(error) = ccall((:AUTDGetLastError,  _autd3capi), Int32, (Ref{UInt8},), error)
 
@@ -143,6 +145,8 @@ autd_delete_sequence(seq) = ccall((:AUTDDeleteSequence,  _autd3capi), Cvoid, (Pt
 autd_circum_sequence(out,x,y,z,nx,ny,nz,radius,n) = ccall((:AUTDCircumSequence,  _autd3capi), Cvoid, (Ref{Ptr{Cvoid}}, Float64, Float64, Float64, Float64, Float64, Float64, Float64, UInt64,), out, x, y, z, nx, ny, nz, radius, n)
 
 autd_stop(handle) = ccall((:AUTDStop,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
+autd_pause(handle) = ccall((:AUTDPause,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
+autd_resume(handle) = ccall((:AUTDResume,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
 autd_send_gain(handle,gain) = ccall((:AUTDSendGain,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{Cvoid},), handle, gain)
 

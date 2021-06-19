@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 18/06/2021
+# Last Modified: 19/06/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -14,7 +14,7 @@ module AUTD3
 using StaticArrays
 
 export Gain, Modulation, Sequence, Link, AUTD
-export open_autd, dispose, add_device, synchronize, clear, set_silent_mode, stop, is_open, is_silent_mode, wavelength, set_wavelength
+export open_autd, dispose, add_device, synchronize, clear, set_silent_mode, stop, pause, resume, is_open, is_silent_mode, wavelength, set_wavelength
 export num_devices, num_transducers
 export device_direction_x, device_direction_y, device_direction_z, trans_position, device_idx_for_trans_idx
 export enumerate_adapters, firmware_info_list
@@ -174,6 +174,14 @@ end
 
 function stop(autd::AUTD)
     autd_stop(autd._handle)
+end
+
+function pause(autd::AUTD)
+    autd_pause(autd._handle)
+end
+
+function resume(autd::AUTD)
+    autd_resume(autd._handle)
 end
 
 function is_open(autd::AUTD)
