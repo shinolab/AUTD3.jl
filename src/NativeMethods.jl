@@ -65,8 +65,10 @@ autd_get_fpga_info(handle,out) = ccall((:AUTDGetFPGAInfo,  _autd3capi), Bool, (P
 autd_update_ctrl_flags(handle) = ccall((:AUTDUpdateCtrlFlags,  _autd3capi), Bool, (Ptr{Cvoid},), handle)
 
 autd_set_output_delay(handle,delay) = ccall((:AUTDSetOutputDelay,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, delay)
-autd_set_enable(handle,enable) = ccall((:AUTDSetEnable,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, enable)
-autd_set_delay_enable(handle,delay_enable) = ccall((:AUTDSetDelayEnable,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt16},), handle, delay_enable)
+
+autd_set_duty_offset(handle,offset) = ccall((:AUTDSetDutyOffset,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8},), handle, offset)
+
+autd_set_delay_offset(handle,delay,offset) = ccall((:AUTDSetDelayOffset,  _autd3capi), Bool, (Ptr{Cvoid}, Ptr{UInt8}, Ptr{UInt8},), handle, delay, offset)
 
 autd_get_last_error(error) = ccall((:AUTDGetLastError,  _autd3capi), Int32, (Ref{UInt8},), error)
 
