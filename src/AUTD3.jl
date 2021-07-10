@@ -3,7 +3,7 @@
 # Created Date: 11/02/2020
 # Author: Shun Suzuki
 # -----
-# Last Modified: 19/06/2021
+# Last Modified: 10/07/2021
 # Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 # -----
 # Copyright (c) 2020 Hapis Lab. All rights reserved.
@@ -488,6 +488,12 @@ end
 function twincat_link()
     chandle = Ref(Ptr{Cvoid}(0))
     autd_link_twincat(chandle)
+Link(chandle[])
+end
+
+function emulator_link(port::UInt16, autd::AUTD)
+    chandle = Ref(Ptr{Cvoid}(0))
+    autd_link_emulator(chandle, port, autd._handle)
 Link(chandle[])
 end
 

@@ -198,3 +198,6 @@ autd_link_soem(out,ifname,device_num,cycle_ticks) = ccall((:AUTDLinkSOEM,  _autd
 
 const _autd3capi_twincat_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-twincat-link" * get_lib_ext())
 autd_link_twincat(out) = ccall((:AUTDLinkTwinCAT,  _autd3capi_twincat_link), Cvoid, (Ref{Ptr{Cvoid}},), out)
+
+const _autd3capi_emulator_link = joinpath(@__DIR__, "bin", get_lib_prefix() * "autd3capi-emulator-link" * get_lib_ext())
+autd_link_emulator(out,port,cnt) = ccall((:AUTDLinkEmulator, _autd3capi_emulator_link), Cvoid, (Ref{Ptr{Cvoid}}, UInt16, Ptr{Cvoid}), out, port, cnt)
